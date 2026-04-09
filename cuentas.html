@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Clientes</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI',sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
+}
+
+.header{
+  color:white;
+  font-size:28px;
+  margin:25px;
+}
+
+/* LOGIN */
+.container{
+  width:100%;
+  max-width:600px;
+  background:white;
+  border-radius:15px;
+  padding:30px;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+
+.tabs{
+  display:flex;
+}
+
+.tabs button{
+  flex:1;
+  padding:12px;
+  border:none;
+  cursor:pointer;
+  background:#2f496e;
+  color:white;
+}
+
+.tabs button.active{
+  background:#2fa4e7;
+}
+
+.form{display:none;}
+.form.active{display:block;}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+
+.btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  background:#2fa4e7;
+  color:white;
+  cursor:pointer;
+}
+
+/* CRUD */
+.clients_wrapper{
+  display:none;
+  width:100%;
+  max-width:900px;
+  margin-top:20px;
+}
+
+.crud{
+  display:flex;
+  gap:20px;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+}
+
+.form-box{width:280px;}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  background:#2f496e;
+  color:white;
+}
+
+th,td{
+  padding:10px;
+  text-align:center;
+}
+
+button.edit{background:#28a745;color:white;border:none;padding:5px;}
+button.delete{background:#dc3545;color:white;border:none;padding:5px;}
+</style>
+</head>
+
+<body>
+
+<div class="header">Sistema Gestión Clientes</div>
+
+<!-- LOGIN -->
+<div class="container">
+
+<div class="tabs">
+<button id="tabLogin" class="active">Login</button>
+<button id="tabRegister">Registro</button>
+</div>
+
+<div id="login" class="form active">
+<input id="login_user" placeholder="Usuario">
+<input id="login_pass" type="password" placeholder="Contraseña">
+<button class="btn" onclick="login()">Entrar</button>
+</div>
+
+<div id="register" class="form">
+<input id="reg_name" placeholder="Nombre">
+<input id="reg_email" placeholder="Correo">
+<input id="reg_pass" type="password" placeholder="Contraseña">
+<button class="btn" onclick="registrar()">Registrar</button>
+</div>
+
+</div>
+
+<!-- CRUD CLIENTES -->
+<div class="clients_wrapper" id="clientesUI">
+    <div style="margin-bottom:15px; display:flex; gap:10px;">
+  <button class="btn" onclick="regresarInicio()">⬅ Regresar</button>
+  <button class="btn" style="background:#dc3545" onclick="salir()">🚪 Salir</button>
+</div>
+
+<div class="crud">
+
+<div class="form-box">
+<input id="dni" placeholder="DNI">
+<input id="nombre" placeholder="Nombre">
+<input id="direccion" placeholder="Dirección">
+
+<button class="btn" onclick="guardar()">Guardar</button>
+<button class="btn" style="background:red" onclick="cancelar()">Cancelar</button>
+</div>
+
+<div style="flex:1">
+<table>
+<thead>
+<tr>
+<th>OPC</th>
+<th>DNI</th>
+<th>NOMBRE</th>
+<th>DIRECCIÓN</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+
+</div>
+</div>
+
+<script>
+    
+    /* ===== REGRESAR Y SALIR (FIXED) ===== */
+
+function regresarInicio(){
+
+  const container = document.querySelector(".container");
+  const clientesUI = document.getElementById("clientesUI");
+
+  container.style.display = "block";
+  clientesUI.style.display = "none";
+}
+
+function salir(){
+
+  const container = document.querySelector(".container");
+  const clientesUI = document.getElementById("clientesUI");
+
+  const loginUser = document.getElementById("login_user");
+  const loginPass = document.getElementById("login_pass");
+
+  const tabLogin = document.getElementById("tabLogin");
+
+  if(confirm("¿Deseas cerrar sesión?")){
+
+    // limpiar login
+    loginUser.value = "";
+    loginPass.value = "";
+
+    // ocultar clientes
+    clientesUI.style.display = "none";
+
+    // mostrar login
+    container.style.display = "block";
+
+    // volver pestaña login
+    tabLogin.click();
+  }
+}
+
+/* ===== TABS ===== */
+
+tabLogin.onclick=()=>{
+login.classList.add("active");
+register.classList.remove("active");
+tabLogin.classList.add("active");
+tabRegister.classList.remove("active");
+};
+
+tabRegister.onclick=()=>{
+register.classList.add("active");
+login.classList.remove("active");
+tabRegister.classList.add("active");
+tabLogin.classList.remove("active");
+};
+
+/* ===== LOGIN ===== */
+
+function login(){
+let u=login_user.value.trim();
+let p=login_pass.value.trim();
+
+if(u && p){
+document.querySelector(".container").style.display="none";
+clientesUI.style.display="block";
+mostrar();
+}else{
+alert("Completa datos");
+}
+}
+
+function registrar(){
+alert("Usuario registrado ✅");
+tabLogin.click();
+}
+
+/* ===== CRUD ===== */
+
+let clientes=[
+{dni:'10293847',nombre:'Carlos Mendoza',dir:'Av Peru 123'},
+{dni:'12121212',nombre:'Beatriz Rivas',dir:'Jr Lima 442'}
+];
+
+let editIndex=-1;
+
+function mostrar(){
+tabla.innerHTML=clientes.map((c,i)=>`
+<tr>
+<td>
+<button class="edit" onclick="editar(${i})">✏️</button>
+<button class="delete" onclick="eliminar(${i})">🗑</button>
+</td>
+<td>${c.dni}</td>
+<td>${c.nombre}</td>
+<td>${c.dir}</td>
+</tr>
+`).join("");
+}
+
+function guardar(){
+
+let d=dni.value.trim();
+let n=nombre.value.trim();
+let dir=direccion.value.trim();
+
+if(!d||!n||!dir){
+alert("Completa datos");
+return;
+}
+
+if(editIndex==-1){
+clientes.push({dni:d,nombre:n,dir});
+}else{
+clientes[editIndex]={dni:d,nombre:n,dir};
+editIndex=-1;
+}
+
+limpiar();
+mostrar();
+}
+
+function editar(i){
+dni.value=clientes[i].dni;
+nombre.value=clientes[i].nombre;
+direccion.value=clientes[i].dir;
+editIndex=i;
+}
+
+function eliminar(i){
+if(confirm("Eliminar cliente?")){
+clientes.splice(i,1);
+mostrar();
+}
+}
+
+function limpiar(){
+dni.value="";
+nombre.value="";
+direccion.value="";
+}
+
+function cancelar(){
+editIndex=-1;
+limpiar();
+}
+
+</script>
+
